@@ -331,3 +331,6 @@ ASALocalRun/
 /*.qlplugin
 /GitVersion.cs
 /QuickLook.Plugin.Metadata.config
+
+# Claude Code local tooling config (dev only)
+.claude/

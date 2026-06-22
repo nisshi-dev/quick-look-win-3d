@@ -115,6 +115,15 @@ function hideOverlay() {
   overlay.classList.add('hidden');
 }
 
+/**
+ * Notify the native host (WebView2) that loading finished.
+ * In a plain browser `window.chrome.webview` is undefined, so this is a no-op.
+ * The C# side listens for this to clear QuickLook's busy spinner.
+ */
+function notifyHost(status: 'loaded' | 'error') {
+  (window as any).chrome?.webview?.postMessage(status);
+}
+
 /** Fit the camera and target to the model's bounding box. */
 function frameModel(root: THREE.Object3D) {
   const box = new THREE.Box3().setFromObject(root);
@@ -205,6 +214,7 @@ function applyModel(
   currentVrm = vrm;
   frameModel(root);
   hideOverlay();
+  notifyHost('loaded');
 }
 
 async function loadModelFromArrayBuffer(buffer: ArrayBuffer) {
@@ -246,6 +256,7 @@ async function loadModelFromArrayBuffer(buffer: ArrayBuffer) {
   } catch (e) {
     console.error('[model] load failed', e);
     showOverlay('Failed to load', true);
+    notifyHost('error');
   }
 }
 

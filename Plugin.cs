@@ -1,7 +1,6 @@
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using QuickLook.Common.Plugin;
 
 namespace QuickLook.Plugin.Model3DViewer
@@ -11,6 +10,8 @@ namespace QuickLook.Plugin.Model3DViewer
         // 対応する3Dモデル拡張子(優先順: glb → vrm/vrma → fbx)
         private static readonly string[] SupportedExtensions =
             { ".glb", ".vrm", ".vrma", ".fbx" };
+
+        private ModelViewerPanel _panel;
 
         public int Priority => 0;
 
@@ -26,22 +27,27 @@ namespace QuickLook.Plugin.Model3DViewer
 
         public void Prepare(string path, ContextObject context)
         {
-            context.PreferredSize = new Size { Width = 1200, Height = 900 };
+            context.SetPreferredSizeFit(new Size(1200, 900), 0.8);
+            context.TitlebarOverlap = true;
+            context.TitlebarAutoHide = true;
+            context.CanResize = true;
         }
 
         public void View(string path, ContextObject context)
         {
-            // TODO: WebView2 + Three.js レンダラーに置き換える(次ステップ)
-            var viewer = new Label { Content = $"3D model viewer (WIP): {Path.GetFileName(path)}" };
+            _panel = new ModelViewerPanel();
+            // renderer が読み込み完了(成功/失敗)を通知したらスピナーを止める
+            _panel.ModelLoaded += () => context.IsBusy = false;
+            _panel.LoadModel(path, context.Theme);
 
-            context.ViewerContent = viewer;
+            context.ViewerContent = _panel;
             context.Title = Path.GetFileName(path);
-
-            context.IsBusy = false;
         }
 
         public void Cleanup()
         {
+            _panel?.Dispose();
+            _panel = null;
         }
     }
 }

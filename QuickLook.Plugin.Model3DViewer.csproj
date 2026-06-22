@@ -35,6 +35,23 @@
       <Page Remove="QuickLook.Common\**" />
     </ItemGroup>
 
+    <!-- renderer/ は Node プロジェクト。C# ビルドの対象から外す(node_modules 等の巨大ツリーを除外) -->
+    <ItemGroup>
+      <Compile Remove="renderer\**" />
+      <EmbeddedResource Remove="renderer\**" />
+      <None Remove="renderer\**" />
+      <Page Remove="renderer\**" />
+    </ItemGroup>
+
+    <!-- ビルド済みレンダラー(renderer/dist)を出力の renderer/ に同梱。
+         ※事前に `npm run build`(renderer/)で dist を生成しておくこと -->
+    <ItemGroup>
+      <None Include="renderer\dist\**\*">
+        <Link>renderer\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
     <ItemGroup>
         <None Include="QuickLook.Plugin.Metadata.Base.config" />
         <None Include="QuickLook.Plugin.Metadata.config">
@@ -44,5 +61,9 @@
 
     <ItemGroup>
         <ProjectReference Include="QuickLook.Common\QuickLook.Common.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4022.49" />
     </ItemGroup>
 </Project>

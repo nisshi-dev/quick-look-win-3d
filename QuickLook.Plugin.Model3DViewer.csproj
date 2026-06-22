@@ -28,12 +28,15 @@
         <DefineConstants>TRACE</DefineConstants>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="QuickLook.Common\**" />
-      <EmbeddedResource Remove="QuickLook.Common\**" />
-      <None Remove="QuickLook.Common\**" />
-      <Page Remove="QuickLook.Common\**" />
-    </ItemGroup>
+    <!-- バージョン情報を生成(GitVersion.cs と QuickLook.Plugin.Metadata.config)。
+         以前は QuickLook.Common(submodule)のビルド前処理で実行されていたが、
+         NuGet 化に伴い本プロジェクトに移設。-ExecutionPolicy Bypass で実行ポリシー非依存。
+         生成失敗時も既存ファイルでビルドを続行する(ContinueOnError)。 -->
+    <Target Name="GenerateVersionInfo" BeforeTargets="BeforeBuild">
+        <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\update-version.ps1&quot;"
+              WorkingDirectory="$(MSBuildProjectDirectory)"
+              ContinueOnError="true" />
+    </Target>
 
     <!-- renderer/ は Node プロジェクト。C# ビルドの対象から外す(node_modules 等の巨大ツリーを除外) -->
     <ItemGroup>
@@ -59,12 +62,14 @@
         </None>
     </ItemGroup>
 
-    <!-- QuickLook.Common は本体が提供する。プラグインに同梱すると IViewer の
-         型同一性が食い違いプラグインが無視されるため、出力にコピーしない。 -->
+    <!-- QuickLook.Common は QuickLook 本体が実行時に提供する。
+         NuGet からコンパイル時のみ参照し、ExcludeAssets=runtime で出力には載せない
+         (同梱すると IViewer の型同一性が食い違い、プラグインが無視されるため)。
+         ※ 公式の方針変更により submodule ではなく NuGet 参照を使う。 -->
     <ItemGroup>
-        <ProjectReference Include="QuickLook.Common\QuickLook.Common.csproj">
-            <Private>False</Private>
-        </ProjectReference>
+        <PackageReference Include="QuickLook.Common" Version="4.5.0">
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
@@ -72,10 +77,4 @@
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
     </ItemGroup>
-
-    <!-- 念のためビルド後に QuickLook.Common を出力から除去(公式プラグイン準拠) -->
-    <Target Name="ReduceReleasePackaging" AfterTargets="Build">
-        <Delete Files="$(OutputPath)\QuickLook.Common.dll" />
-        <Delete Files="$(OutputPath)\QuickLook.Common.pdb" />
-    </Target>
 </Project>

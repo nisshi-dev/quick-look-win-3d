@@ -65,6 +65,12 @@ const grid = new THREE.GridHelper(10, 20, 0x444444, 0x2a2a2a);
 grid.visible = false;
 scene.add(grid);
 
+// Axis gizmo (bottom-left): a small overlay showing the world X/Y/Z orientation.
+// Rendered in its own viewport each frame, oriented to match the main camera.
+const axisScene = new THREE.Scene();
+const axisCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
+axisScene.add(new THREE.AxesHelper(1.2));
+
 // ---------------------------------------------------------------------------
 // Loaders
 // ---------------------------------------------------------------------------
@@ -548,9 +554,36 @@ function animate() {
   controls.update();
   if (currentVrm) currentVrm.update(delta); // update spring bones, expressions, etc.
   if (currentMixer) currentMixer.update(delta); // glTF/GLB animation
+
+  renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
   renderer.render(scene, camera);
+
+  if (currentRoot) renderAxisGizmo();
 }
 animate();
+
+/** Draw the orientation axes in a small square viewport at the bottom-left. */
+function renderAxisGizmo() {
+  const px = 88; // gizmo size in CSS pixels
+  const margin = 12;
+
+  // Match the gizmo camera's orientation to the main camera so the world axes
+  // rotate with the view.
+  axisCamera.position
+    .copy(camera.position)
+    .sub(controls.target)
+    .normalize()
+    .multiplyScalar(3);
+  axisCamera.up.copy(camera.up);
+  axisCamera.lookAt(0, 0, 0);
+
+  renderer.clearDepth();
+  renderer.setScissorTest(true);
+  renderer.setScissor(margin, margin, px, px);
+  renderer.setViewport(margin, margin, px, px);
+  renderer.render(axisScene, axisCamera);
+  renderer.setScissorTest(false);
+}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;

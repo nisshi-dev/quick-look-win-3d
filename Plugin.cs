@@ -27,10 +27,11 @@ namespace QuickLook.Plugin.Model3DViewer
 
         public void Prepare(string path, ContextObject context)
         {
+            // タイトルバー系は上書きしない。既定(TitlebarOverlap=false,
+            // TitlebarAutoHide=false)に任せることで、画像プレビューと同じ
+            // 「常時表示の標準ヘッダー(ファイル名＋ツールバー)」になる。
+            // 組み込みの3Dビューア HelixViewer も同様にタイトルバーを上書きしない。
             context.SetPreferredSizeFit(new Size(1200, 900), 0.8);
-            context.TitlebarOverlap = true;
-            context.TitlebarAutoHide = true;
-            context.CanResize = true;
         }
 
         public void View(string path, ContextObject context)

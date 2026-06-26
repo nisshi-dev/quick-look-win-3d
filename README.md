@@ -42,12 +42,28 @@ The info panel labels switch between English, Japanese, and Korean based on the 
 
 ## Install
 
-1. Get `QuickLook.Plugin.Model3DViewer.qlplugin` (build it from source below, or download it from the releases page).
-2. With QuickLook running, select the `.qlplugin` file and press <kbd>Space</kbd>.
-3. Click "Install", then restart QuickLook.
-4. Select any `.glb` / `.vrm` / `.vrma` / `.fbx` file and press <kbd>Space</kbd>.
+### 1. Install QuickLook (the host app)
 
-Requirements: Windows 10/11, [QuickLook](https://github.com/QL-Win/QuickLook) 4.x, the WebView2 runtime (preinstalled on Windows 11).
+This plugin runs inside QuickLook, so install QuickLook itself first. Choose one method:
+
+- Microsoft Store: search for "QuickLook" (easiest, with automatic updates).
+- Installer: download the latest release from the [QuickLook releases page](https://github.com/QL-Win/QuickLook/releases) and run it.
+- Scoop: run `scoop bucket add extras`, then `scoop install quicklook`.
+
+After installing, start QuickLook. It keeps running in the system tray (notification area).
+Confirm it works by selecting any file in Explorer and pressing <kbd>Space</kbd>.
+
+The WebView2 runtime is also required. It is preinstalled on Windows 11 and on most Windows 10 machines (it ships with Microsoft Edge); install it from Microsoft if it is missing.
+
+### 2. Install this plugin
+
+1. Get `QuickLook.Plugin.Model3DViewer.qlplugin` (build it from source below, or download it from this repository's releases page).
+2. With QuickLook running, select the `.qlplugin` file in Explorer and press <kbd>Space</kbd>. QuickLook shows a small panel with the plugin name and an Install button.
+3. Click Install.
+4. Restart QuickLook so it loads the new plugin: quit it from the system tray icon, then start it again.
+5. Select any `.glb` / `.vrm` / `.vrma` / `.fbx` file and press <kbd>Space</kbd>.
+
+Requirements: Windows 10/11.
 
 ## Build from source
 

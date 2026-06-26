@@ -42,12 +42,32 @@ Windows 탐색기에서 스페이스바로 3D 모델을 즉시 미리보는 [Qui
 
 ## 설치
 
-1. `QuickLook.Plugin.Model3DViewer.qlplugin` 을 준비합니다(아래 빌드 절차를 따르거나 릴리스 페이지에서 받기).
-2. QuickLook 이 실행 중인 상태에서 `.qlplugin` 파일을 선택하고 <kbd>Space</kbd> 를 누릅니다.
-3. "Install" 을 누른 뒤 QuickLook 을 재시작합니다.
-4. `.glb` / `.vrm` / `.vrma` / `.fbx` 중 하나를 선택하고 <kbd>Space</kbd> 를 누릅니다.
+### 1. QuickLook 본체 설치
 
-요구 사항: Windows 10/11, [QuickLook](https://github.com/QL-Win/QuickLook) 4.x, WebView2 런타임(Windows 11 에는 기본 포함).
+이 플러그인은 QuickLook 안에서 동작하므로 먼저 QuickLook 본체를 설치합니다.
+다음 중 한 가지 방법을 사용합니다.
+
+- Microsoft Store: "QuickLook" 검색(가장 간단하며 자동 업데이트).
+- 설치 프로그램: [QuickLook 릴리스 페이지](https://github.com/QL-Win/QuickLook/releases)에서 최신 버전을 받아 실행합니다.
+- Scoop: `scoop bucket add extras` 실행 후 `scoop install quicklook`.
+
+설치한 뒤 QuickLook 을 실행합니다.
+QuickLook 은 알림 영역(시스템 트레이)에 상주합니다.
+탐색기에서 아무 파일이나 선택하고 <kbd>Space</kbd> 를 눌러 미리보기가 나오면 정상 동작입니다.
+
+WebView2 런타임도 필요합니다.
+Windows 11 과 대부분의 Windows 10 에는 기본 포함되어 있습니다(Microsoft Edge 에 포함).
+없으면 Microsoft 에서 설치하세요.
+
+### 2. 이 플러그인 설치
+
+1. `QuickLook.Plugin.Model3DViewer.qlplugin` 을 준비합니다(아래 빌드 절차를 따르거나 이 저장소의 릴리스 페이지에서 받기).
+2. QuickLook 이 실행 중인 상태에서 `.qlplugin` 파일을 선택하고 <kbd>Space</kbd> 를 누릅니다. 플러그인 이름과 "Install" 버튼이 표시됩니다.
+3. "Install" 을 누릅니다.
+4. 새 플러그인을 불러오도록 QuickLook 을 재시작합니다. 알림 영역 아이콘에서 종료한 뒤 다시 실행하세요.
+5. `.glb` / `.vrm` / `.vrma` / `.fbx` 중 하나를 선택하고 <kbd>Space</kbd> 를 누릅니다.
+
+요구 사항: Windows 10/11.
 
 ## 소스에서 빌드
 

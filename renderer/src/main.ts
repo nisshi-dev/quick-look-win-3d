@@ -44,6 +44,70 @@ const overlayText = document.getElementById('overlay-text')!;
 const infoPanel = document.getElementById('info-panel')!;
 const infoBody = document.getElementById('info-body')!;
 
+// ---------------------------------------------------------------------------
+// i18n — English (default), Japanese, Korean. Chosen from the OS/browser locale
+// (WebView2 reflects the Windows display language in navigator.language).
+// ---------------------------------------------------------------------------
+type Lang = 'en' | 'ja' | 'ko';
+
+const STRINGS: Record<Lang, Record<string, string>> = {
+  en: {
+    title: 'Model info', loading: 'Loading…', failed: 'Failed to load',
+    file: 'File', geometry: 'Geometry', materials: 'Materials', rig: 'Rig',
+    dimensions: 'Dimensions', animation: 'Animation', vrm: 'VRM',
+    format: 'Format', size: 'Size', generator: 'Generator',
+    triangles: 'Triangles', vertices: 'Vertices', meshes: 'Meshes', objects: 'Objects',
+    materialsRow: 'Materials', textures: 'Textures', blendshapes: 'Blend shapes',
+    bones: 'Bones', skinnedMeshes: 'Skinned meshes', whd: 'W×H×D',
+    clips: 'Clips', clip: 'Clip', spec: 'Spec', vrmTitle: 'Title',
+    author: 'Author', expressions: 'Expressions', license: 'License',
+  },
+  ja: {
+    title: 'モデル情報', loading: '読み込み中…', failed: '読み込みに失敗しました',
+    file: 'ファイル', geometry: 'ジオメトリ', materials: 'マテリアル', rig: 'リグ',
+    dimensions: '寸法', animation: 'アニメーション', vrm: 'VRM',
+    format: '形式', size: 'サイズ', generator: '生成',
+    triangles: 'ポリゴン', vertices: '頂点', meshes: 'メッシュ', objects: 'オブジェクト',
+    materialsRow: 'マテリアル', textures: 'テクスチャ', blendshapes: 'ブレンドシェイプ',
+    bones: 'ボーン', skinnedMeshes: 'スキンメッシュ', whd: '幅×高×奥',
+    clips: 'クリップ数', clip: 'クリップ', spec: '仕様', vrmTitle: 'タイトル',
+    author: '作者', expressions: '表情', license: 'ライセンス',
+  },
+  ko: {
+    title: '모델 정보', loading: '불러오는 중…', failed: '불러오기 실패',
+    file: '파일', geometry: '지오메트리', materials: '머티리얼', rig: '리그',
+    dimensions: '치수', animation: '애니메이션', vrm: 'VRM',
+    format: '형식', size: '용량', generator: '생성 도구',
+    triangles: '삼각형', vertices: '정점', meshes: '메시', objects: '오브젝트',
+    materialsRow: '머티리얼', textures: '텍스처', blendshapes: '블렌드셰이프',
+    bones: '본', skinnedMeshes: '스킨 메시', whd: '가로×세로×깊이',
+    clips: '클립 수', clip: '클립', spec: '사양', vrmTitle: '제목',
+    author: '작성자', expressions: '표정', license: '라이선스',
+  },
+};
+
+function detectLang(): Lang {
+  const cands = navigator.languages?.length ? navigator.languages : [navigator.language || 'en'];
+  for (const c of cands) {
+    const code = c.toLowerCase();
+    if (code.startsWith('ja')) return 'ja';
+    if (code.startsWith('ko')) return 'ko';
+    if (code.startsWith('en')) return 'en';
+  }
+  return 'en';
+}
+
+const lang = detectLang();
+const t = (key: string): string => STRINGS[lang][key] ?? STRINGS.en[key] ?? key;
+
+// Localize static chrome up front (panel title, initial loading text).
+document.documentElement.lang = lang;
+{
+  const titleEl = document.querySelector('#info-header .info-title');
+  if (titleEl) titleEl.textContent = t('title');
+  overlayText.textContent = t('loading');
+}
+
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -388,41 +452,41 @@ function renderInfoPanel(info: ModelInfo) {
   const sections: { label: string; rows: [string, string][] }[] = [];
 
   const file: [string, string][] = [
-    ['形式', info.format],
-    ['サイズ', fmtBytes(info.bytes)],
+    [t('format'), info.format],
+    [t('size'), fmtBytes(info.bytes)],
   ];
-  if (info.generator) file.push(['生成', info.generator]);
-  sections.push({ label: 'ファイル', rows: file });
+  if (info.generator) file.push([t('generator'), info.generator]);
+  sections.push({ label: t('file'), rows: file });
 
   if (info.meshes > 0) {
     sections.push({
-      label: 'ジオメトリ',
+      label: t('geometry'),
       rows: [
-        ['ポリゴン', fmtNum(info.triangles)],
-        ['頂点', fmtNum(info.vertices)],
-        ['メッシュ', fmtNum(info.meshes)],
-        ['オブジェクト', fmtNum(info.objects)],
+        [t('triangles'), fmtNum(info.triangles)],
+        [t('vertices'), fmtNum(info.vertices)],
+        [t('meshes'), fmtNum(info.meshes)],
+        [t('objects'), fmtNum(info.objects)],
       ],
     });
     const appearance: [string, string][] = [
-      ['マテリアル', fmtNum(info.materials)],
-      ['テクスチャ', fmtNum(info.textures)],
+      [t('materialsRow'), fmtNum(info.materials)],
+      [t('textures'), fmtNum(info.textures)],
     ];
-    if (info.morphs > 0) appearance.push(['ブレンドシェイプ', fmtNum(info.morphs)]);
-    sections.push({ label: 'マテリアル', rows: appearance });
+    if (info.morphs > 0) appearance.push([t('blendshapes'), fmtNum(info.morphs)]);
+    sections.push({ label: t('materials'), rows: appearance });
   }
 
   const rig: [string, string][] = [];
-  if (info.bones > 0) rig.push(['ボーン', fmtNum(info.bones)]);
-  if (info.skinnedMeshes > 0) rig.push(['スキンメッシュ', fmtNum(info.skinnedMeshes)]);
-  if (rig.length) sections.push({ label: 'リグ', rows: rig });
+  if (info.bones > 0) rig.push([t('bones'), fmtNum(info.bones)]);
+  if (info.skinnedMeshes > 0) rig.push([t('skinnedMeshes'), fmtNum(info.skinnedMeshes)]);
+  if (rig.length) sections.push({ label: t('rig'), rows: rig });
 
   if (info.meshes > 0 && (info.size.x || info.size.y || info.size.z)) {
     sections.push({
-      label: '寸法',
+      label: t('dimensions'),
       rows: [
         [
-          '幅×高×奥',
+          t('whd'),
           `${info.size.x.toFixed(2)} × ${info.size.y.toFixed(2)} × ${info.size.z.toFixed(2)}`,
         ],
       ],
@@ -430,20 +494,20 @@ function renderInfoPanel(info: ModelInfo) {
   }
 
   if (info.clips.length > 0) {
-    const rows: [string, string][] = [['クリップ数', fmtNum(info.clips.length)]];
+    const rows: [string, string][] = [[t('clips'), fmtNum(info.clips.length)]];
     info.clips.slice(0, 5).forEach((c, i) => {
-      rows.push([c.name || `クリップ ${i + 1}`, `${c.duration.toFixed(2)}s`]);
+      rows.push([c.name || `${t('clip')} ${i + 1}`, `${c.duration.toFixed(2)}s`]);
     });
-    sections.push({ label: 'アニメーション', rows });
+    sections.push({ label: t('animation'), rows });
   }
 
   if (info.vrm) {
-    const rows: [string, string][] = [['仕様', info.vrm.version]];
-    if (info.vrm.title) rows.push(['タイトル', info.vrm.title]);
-    if (info.vrm.author) rows.push(['作者', info.vrm.author]);
-    if (info.vrm.expressions) rows.push(['表情', fmtNum(info.vrm.expressions)]);
-    if (info.vrm.license) rows.push(['ライセンス', info.vrm.license]);
-    sections.push({ label: 'VRM', rows });
+    const rows: [string, string][] = [[t('spec'), info.vrm.version]];
+    if (info.vrm.title) rows.push([t('vrmTitle'), info.vrm.title]);
+    if (info.vrm.author) rows.push([t('author'), info.vrm.author]);
+    if (info.vrm.expressions) rows.push([t('expressions'), fmtNum(info.vrm.expressions)]);
+    if (info.vrm.license) rows.push([t('license'), info.vrm.license]);
+    sections.push({ label: t('vrm'), rows });
   }
 
   infoBody.innerHTML = sections
@@ -468,7 +532,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 async function loadModelFromArrayBuffer(buffer: ArrayBuffer) {
-  showOverlay('Loading…');
+  showOverlay(t('loading'));
   infoReady = false;
   infoPanel.classList.add('hidden');
   try {
@@ -521,7 +585,7 @@ async function loadModelFromArrayBuffer(buffer: ArrayBuffer) {
     );
   } catch (e) {
     console.error('[model] load failed', e);
-    showOverlay('Failed to load', true);
+    showOverlay(t('failed'), true);
     notifyHost('error');
   }
 }
@@ -560,11 +624,11 @@ console.log('renderer booted, WebGL context =', !!renderer.getContext());
   const params = new URLSearchParams(location.search);
   const url = params.get('url');
   if (url) {
-    showOverlay('Loading…');
+    showOverlay(t('loading'));
     fetch(url)
       .then((r) => r.arrayBuffer())
       .then((buf) => loadModelFromArrayBuffer(buf))
-      .catch(() => showOverlay('Failed to load', true));
+      .catch(() => showOverlay(t('failed'), true));
   } else if (location.protocol.startsWith('http')) {
     showOverlay('Drag & drop a .vrm / .vrma / .glb / .fbx');
   }

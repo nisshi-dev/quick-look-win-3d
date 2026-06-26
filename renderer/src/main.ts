@@ -23,33 +23,33 @@ const STRINGS: Record<Lang, Record<string, string>> = {
   en: {
     title: 'Model info', loading: 'Loading…', failed: 'Failed to load',
     file: 'File', geometry: 'Geometry', materials: 'Materials', rig: 'Rig',
-    dimensions: 'Dimensions', animation: 'Animation', vrm: 'VRM',
+    animation: 'Animation', vrm: 'VRM',
     format: 'Format', size: 'Size', generator: 'Generator',
     triangles: 'Triangles', vertices: 'Vertices', meshes: 'Meshes', objects: 'Objects',
     materialsRow: 'Materials', textures: 'Textures', blendshapes: 'Blend shapes',
-    bones: 'Bones', skinnedMeshes: 'Skinned meshes', whd: 'W×H×D',
+    bones: 'Bones', skinnedMeshes: 'Skinned meshes',
     clips: 'Clips', clip: 'Clip', spec: 'Spec', vrmTitle: 'Title',
     author: 'Author', expressions: 'Expressions', license: 'License',
   },
   ja: {
     title: 'モデル情報', loading: '読み込み中…', failed: '読み込みに失敗しました',
     file: 'ファイル', geometry: 'ジオメトリ', materials: 'マテリアル', rig: 'リグ',
-    dimensions: '寸法', animation: 'アニメーション', vrm: 'VRM',
+    animation: 'アニメーション', vrm: 'VRM',
     format: '形式', size: 'サイズ', generator: '生成',
     triangles: 'ポリゴン', vertices: '頂点', meshes: 'メッシュ', objects: 'オブジェクト',
     materialsRow: 'マテリアル', textures: 'テクスチャ', blendshapes: 'ブレンドシェイプ',
-    bones: 'ボーン', skinnedMeshes: 'スキンメッシュ', whd: '幅×高×奥',
+    bones: 'ボーン', skinnedMeshes: 'スキンメッシュ',
     clips: 'クリップ数', clip: 'クリップ', spec: '仕様', vrmTitle: 'タイトル',
     author: '作者', expressions: '表情', license: 'ライセンス',
   },
   ko: {
     title: '모델 정보', loading: '불러오는 중…', failed: '불러오기 실패',
     file: '파일', geometry: '지오메트리', materials: '머티리얼', rig: '리그',
-    dimensions: '치수', animation: '애니메이션', vrm: 'VRM',
+    animation: '애니메이션', vrm: 'VRM',
     format: '형식', size: '용량', generator: '생성 도구',
     triangles: '삼각형', vertices: '정점', meshes: '메시', objects: '오브젝트',
     materialsRow: '머티리얼', textures: '텍스처', blendshapes: '블렌드셰이프',
-    bones: '본', skinnedMeshes: '스킨 메시', whd: '가로×세로×깊이',
+    bones: '본', skinnedMeshes: '스킨 메시',
     clips: '클립 수', clip: '클립', spec: '사양', vrmTitle: '제목',
     author: '작성자', expressions: '표정', license: '라이선스',
   },
@@ -273,7 +273,6 @@ interface ModelInfo {
   morphs: number;
   bones: number;
   skinnedMeshes: number;
-  size: THREE.Vector3;
   clips: THREE.AnimationClip[];
   vrm?: {
     version: string;
@@ -359,9 +358,6 @@ function computeModelInfo(
     }
   });
 
-  const box = new THREE.Box3().setFromObject(root);
-  const size = box.isEmpty() ? new THREE.Vector3() : box.getSize(new THREE.Vector3());
-
   let vrmInfo: ModelInfo['vrm'];
   if (vrm) {
     const m = vrm.meta as unknown as Record<string, unknown>;
@@ -389,7 +385,6 @@ function computeModelInfo(
     morphs,
     bones: bones.size,
     skinnedMeshes,
-    size,
     clips,
     vrm: vrmInfo,
   };
@@ -449,18 +444,6 @@ function renderInfoPanel(info: ModelInfo) {
   if (info.bones > 0) rig.push([t('bones'), fmtNum(info.bones)]);
   if (info.skinnedMeshes > 0) rig.push([t('skinnedMeshes'), fmtNum(info.skinnedMeshes)]);
   if (rig.length) sections.push({ label: t('rig'), rows: rig });
-
-  if (info.meshes > 0 && (info.size.x || info.size.y || info.size.z)) {
-    sections.push({
-      label: t('dimensions'),
-      rows: [
-        [
-          t('whd'),
-          `${info.size.x.toFixed(2)} × ${info.size.y.toFixed(2)} × ${info.size.z.toFixed(2)}`,
-        ],
-      ],
-    });
-  }
 
   if (info.clips.length > 0) {
     const rows: [string, string][] = [[t('clips'), fmtNum(info.clips.length)]];

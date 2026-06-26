@@ -1,0 +1,61 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history + tags are needed for version stamping
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: renderer/package-lock.json
+
+      - name: Build renderer (Three.js)
+        working-directory: renderer
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Build plugin (Release)
+        run: dotnet build QuickLook.Plugin.Model3DViewer.sln -c Release
+
+      - name: Pack .qlplugin
+        shell: pwsh
+        working-directory: Scripts
+        run: ./pack-zip.ps1
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QuickLook.Plugin.Model3DViewer
+          path: QuickLook.Plugin.Model3DViewer.qlplugin
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: QuickLook.Plugin.Model3DViewer.qlplugin
+          generate_release_notes: true
+          fail_on_unmatched_files: true

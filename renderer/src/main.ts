@@ -60,6 +60,9 @@ scene.add(new THREE.HemisphereLight(0xffffff, 0x444455, 0.6));
 const grid = new THREE.GridHelper(10, 20, 0x444444, 0x2a2a2a);
 (grid.material as THREE.Material).transparent = true;
 (grid.material as THREE.Material).opacity = 0.4;
+// Hidden until a model is loaded and framed, so the grid never flashes at the
+// default camera framing while loading. Revealed in applyModel after frameModel.
+grid.visible = false;
 scene.add(grid);
 
 // ---------------------------------------------------------------------------
@@ -194,6 +197,7 @@ function applyModel(
   currentRoot = root;
   currentVrm = vrm;
   frameModel(root);
+  grid.visible = true; // reveal the coordinate grid now that the camera is framed
   hideOverlay();
   renderInfoPanel(computeModelInfo(root, vrm, clips, meta));
   infoReady = true;
@@ -432,6 +436,7 @@ async function loadModelFromArrayBuffer(buffer: ArrayBuffer) {
   showOverlay(t('loading'));
   infoReady = false;
   infoPanel.classList.add('hidden');
+  grid.visible = false; // hide until the new model is framed
   try {
     disposeCurrent();
 

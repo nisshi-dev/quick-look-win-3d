@@ -13,7 +13,8 @@ It renders `.glb` / `.vrm` / `.vrma` / `.fbx` using Three.js inside WebView2.
 ![Three.js](https://img.shields.io/badge/Three.js-renderer-000000?style=flat-square&logo=three.js&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)
 
-<!-- Insert the demo video (GIF or mp4) here. e.g. ![demo](docs/demo.gif) -->
+![quick-look-win-3d demo](docs/demo.gif)
+
 <!-- Insert the X (formerly Twitter) post here. -->
 
 </div>

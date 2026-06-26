@@ -13,7 +13,8 @@ Windows 탐색기에서 스페이스바로 3D 모델을 즉시 미리보는 [Qui
 ![Three.js](https://img.shields.io/badge/Three.js-renderer-000000?style=flat-square&logo=three.js&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)
 
-<!-- 데모 영상(GIF 또는 mp4)을 여기에 삽입합니다. 예: ![demo](docs/demo.gif) -->
+![quick-look-win-3d 데모](docs/demo.gif)
+
 <!-- X(구 Twitter) 게시물을 여기에 삽입합니다. -->
 
 </div>

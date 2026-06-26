@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { ViewHelper } from 'three/examples/jsm/helpers/ViewHelper.js';
 import { VRMLoaderPlugin, VRMUtils, type VRM } from '@pixiv/three-vrm';
 import { t, lang } from './i18n';
 
@@ -65,11 +66,16 @@ const grid = new THREE.GridHelper(10, 20, 0x444444, 0x2a2a2a);
 grid.visible = false;
 scene.add(grid);
 
-// Axis gizmo (bottom-left): a small overlay showing the world X/Y/Z orientation.
-// Rendered in its own viewport each frame, oriented to match the main camera.
-const axisScene = new THREE.Scene();
-const axisCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 10);
-axisScene.add(new THREE.AxesHelper(1.2));
+// Axis gizmo (bottom-left): three.js ViewHelper. Shows labelled X/Y/Z and lets
+// the user click an axis to snap the view. Rendered each frame in animate().
+const viewHelper = new ViewHelper(camera, renderer.domElement);
+viewHelper.location = { top: null, right: 0, bottom: 8, left: 8 }; // bottom-left (right ignored when left is set)
+viewHelper.center = controls.target; // snap animations orbit around the model
+viewHelper.setLabels('X', 'Y', 'Z');
+renderer.autoClear = false; // clear manually so the gizmo overlays the scene
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (currentRoot) viewHelper.handleClick(e);
+});
 
 // ---------------------------------------------------------------------------
 // Loaders
@@ -551,39 +557,17 @@ window.addEventListener('message', (event) => {
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
+
+  if (viewHelper.animating) viewHelper.update(delta); // click-to-snap animation
   controls.update();
   if (currentVrm) currentVrm.update(delta); // update spring bones, expressions, etc.
   if (currentMixer) currentMixer.update(delta); // glTF/GLB animation
 
-  renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+  renderer.clear();
   renderer.render(scene, camera);
-
-  if (currentRoot) renderAxisGizmo();
+  if (currentRoot) viewHelper.render(renderer);
 }
 animate();
-
-/** Draw the orientation axes in a small square viewport at the bottom-left. */
-function renderAxisGizmo() {
-  const px = 88; // gizmo size in CSS pixels
-  const margin = 12;
-
-  // Match the gizmo camera's orientation to the main camera so the world axes
-  // rotate with the view.
-  axisCamera.position
-    .copy(camera.position)
-    .sub(controls.target)
-    .normalize()
-    .multiplyScalar(3);
-  axisCamera.up.copy(camera.up);
-  axisCamera.lookAt(0, 0, 0);
-
-  renderer.clearDepth();
-  renderer.setScissorTest(true);
-  renderer.setScissor(margin, margin, px, px);
-  renderer.setViewport(margin, margin, px, px);
-  renderer.render(axisScene, axisCamera);
-  renderer.setScissorTest(false);
-}
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;

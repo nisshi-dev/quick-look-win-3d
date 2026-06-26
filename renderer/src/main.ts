@@ -4,37 +4,6 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRMLoaderPlugin, VRMUtils, type VRM } from '@pixiv/three-vrm';
 
-// When launched from the WKWebView (Quick Look extension), forward the console to
-// the Swift side's os_log. In a plain browser there is no messageHandlers, so this is a no-op.
-const nativeLog = (window as any).webkit?.messageHandlers?.log;
-if (nativeLog) {
-  const forward = (level: string, args: unknown[]) => {
-    try {
-      nativeLog.postMessage(
-        `[${level}] ` +
-          args
-            .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
-            .join(' '),
-      );
-    } catch {
-      /* noop */
-    }
-  };
-  for (const level of ['log', 'warn', 'error'] as const) {
-    const orig = console[level].bind(console);
-    console[level] = (...args: unknown[]) => {
-      forward(level, args);
-      orig(...args);
-    };
-  }
-  window.addEventListener('error', (e) =>
-    forward('error', [e.message, e.filename, e.lineno]),
-  );
-  window.addEventListener('unhandledrejection', (e) =>
-    forward('error', ['unhandledrejection', String(e.reason)]),
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
@@ -597,49 +566,44 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
   return bytes.buffer;
 }
 
+console.log('renderer booted, WebGL context =', !!renderer.getContext());
+
 // ---------------------------------------------------------------------------
-// Entry point from the Swift side (WKWebView)
-//   received via window.postMessage({ type: 'loadVRM', base64 })
+// Load entry points
+//   - QuickLook (production): the C# host navigates to index.html?url=<assetUrl>,
+//     and the renderer fetches that URL below. This always runs.
+//   - postMessage({ type: 'loadVRM', base64 }): programmatic hook for development
+//     and automated testing (Vite reserves the ?url query, so tests use this).
+//   - Drag & drop: convenience when opening the renderer directly in a browser.
 // ---------------------------------------------------------------------------
 window.addEventListener('message', (event) => {
   if (event.data?.type !== 'loadVRM') return;
-  console.log('received loadVRM message, base64 length =', event.data.base64?.length);
   void loadModelFromArrayBuffer(base64ToArrayBuffer(event.data.base64));
 });
 
-console.log('renderer booted, WebGL context =', !!renderer.getContext());
-
-// Browser dev fallbacks ---------------------------------------------------
-// Only for opening the renderer directly in a browser during development:
-//   1) load ?url=... if present
-//   2) load a file dropped onto the window
-// Inside QuickLook (WebView2) the C# host streams the model via postMessage,
-// so these aids are skipped entirely — otherwise the "Drag & drop" hint would
-// briefly show over the loading view.
-(function devFallbacks() {
-  if ((window as unknown as { chrome?: { webview?: unknown } }).chrome?.webview) {
-    return;
-  }
-
-  const params = new URLSearchParams(location.search);
-  const url = params.get('url');
+(function initLoad() {
+  const url = new URLSearchParams(location.search).get('url');
   if (url) {
     showOverlay(t('loading'));
     fetch(url)
       .then((r) => r.arrayBuffer())
       .then((buf) => loadModelFromArrayBuffer(buf))
       .catch(() => showOverlay(t('failed'), true));
-  } else if (location.protocol.startsWith('http')) {
-    showOverlay('Drag & drop a .vrm / .vrma / .glb / .fbx');
+    return;
   }
 
-  window.addEventListener('dragover', (e) => e.preventDefault());
-  window.addEventListener('drop', (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) return;
-    file.arrayBuffer().then((buf) => loadModelFromArrayBuffer(buf));
-  });
+  // No model supplied — only reachable when opening the renderer directly in a
+  // browser (inside QuickLook the host always provides ?url). Offer drag & drop.
+  const inHost = !!(window as unknown as { chrome?: { webview?: unknown } }).chrome?.webview;
+  if (!inHost) {
+    showOverlay('Drag & drop a .vrm / .vrma / .glb / .fbx');
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const file = e.dataTransfer?.files?.[0];
+      if (file) void file.arrayBuffer().then((buf) => loadModelFromArrayBuffer(buf));
+    });
+  }
 })();
 
 // ---------------------------------------------------------------------------

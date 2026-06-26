@@ -106,7 +106,10 @@ The renderer is vendored from [sawa-zen/quick-look-3d](https://github.com/sawa-z
 
 ## Credits
 
-- The renderer is based on [sawa-zen/quick-look-3d](https://github.com/sawa-zen/quick-look-3d) (macOS, MIT, © sawa-zen).
+The whole idea for this project comes from [sawa-zen/quick-look-3d](https://github.com/sawa-zen/quick-look-3d), the macOS version of a 3D-model Quick Look viewer.
+This plugin is the Windows counterpart, and it reuses that project's renderer.
+Many thanks to sawa-zen for sharing the original work (MIT, © sawa-zen).
+
 - Scaffolded from the [QuickLook.Plugin.HelloWorld](https://github.com/QL-Win/QuickLook.Plugin.HelloWorld) template (MIT, © Paddy Xu).
 - [QuickLook](https://github.com/QL-Win/QuickLook) itself is by Paddy Xu and its contributors.
 - VRM support uses [@pixiv/three-vrm](https://github.com/pixiv/three-vrm).

@@ -62,7 +62,7 @@ Windows 11 과 대부분의 Windows 10 에는 기본 포함되어 있습니다(M
 
 ### 2. 이 플러그인 설치
 
-1. `QuickLook.Plugin.Model3DViewer.qlplugin` 을 준비합니다(아래 빌드 절차를 따르거나 이 저장소의 릴리스 페이지에서 받기).
+1. `QuickLook.Plugin.Model3DViewer.qlplugin` 을 준비합니다(아래 빌드 절차를 따르거나 [릴리스 페이지](https://github.com/nisshi-dev/quick-look-win-3d/releases)에서 받기).
 2. QuickLook 이 실행 중인 상태에서 `.qlplugin` 파일을 선택하고 <kbd>Space</kbd> 를 누릅니다. 플러그인 이름과 "Install" 버튼이 표시됩니다.
 3. "Install" 을 누릅니다.
 4. 새 플러그인을 불러오도록 QuickLook 을 재시작합니다. 알림 영역 아이콘에서 종료한 뒤 다시 실행하세요.

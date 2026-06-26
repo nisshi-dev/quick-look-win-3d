@@ -58,7 +58,7 @@ The WebView2 runtime is also required. It is preinstalled on Windows 11 and on m
 
 ### 2. Install this plugin
 
-1. Get `QuickLook.Plugin.Model3DViewer.qlplugin` (build it from source below, or download it from this repository's releases page).
+1. Get `QuickLook.Plugin.Model3DViewer.qlplugin` (build it from source below, or download it from the [releases page](https://github.com/nisshi-dev/quick-look-win-3d/releases)).
 2. With QuickLook running, select the `.qlplugin` file in Explorer and press <kbd>Space</kbd>. QuickLook shows a small panel with the plugin name and an Install button.
 3. Click Install.
 4. Restart QuickLook so it loads the new plugin: quit it from the system tray icon, then start it again.

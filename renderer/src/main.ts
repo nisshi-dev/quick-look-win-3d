@@ -546,9 +546,17 @@ window.addEventListener('message', (event) => {
 console.log('renderer booted, WebGL context =', !!renderer.getContext());
 
 // Browser dev fallbacks ---------------------------------------------------
-// 1) load ?url=... if present
-// 2) load a file dropped onto the window
+// Only for opening the renderer directly in a browser during development:
+//   1) load ?url=... if present
+//   2) load a file dropped onto the window
+// Inside QuickLook (WebView2) the C# host streams the model via postMessage,
+// so these aids are skipped entirely — otherwise the "Drag & drop" hint would
+// briefly show over the loading view.
 (function devFallbacks() {
+  if ((window as unknown as { chrome?: { webview?: unknown } }).chrome?.webview) {
+    return;
+  }
+
   const params = new URLSearchParams(location.search);
   const url = params.get('url');
   if (url) {

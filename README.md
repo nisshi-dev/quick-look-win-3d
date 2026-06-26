@@ -1,103 +1,98 @@
 <div align="center">
 
-# 🧊 quick-look-win-3d
+# quick-look-win-3d
 
-### Preview 3D models in Windows Explorer — just hit <kbd>Space</kbd>.
+Windows のエクスプローラーで 3D モデルをスペースキーで即座にプレビューする [QuickLook](https://github.com/QL-Win/QuickLook) プラグイン。
 
-A [**QuickLook**](https://github.com/QL-Win/QuickLook) plugin that instantly previews
-`.glb` · `.vrm` · `.vrma` · `.fbx` files, rendered with **Three.js** inside **WebView2**.
-
-<br />
+`.glb` / `.vrm` / `.vrma` / `.fbx` を Three.js と WebView2 で描画します。
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=flat-square&logo=windows&logoColor=white)
 ![QuickLook](https://img.shields.io/badge/QuickLook-plugin-2C9FDB?style=flat-square)
 ![Three.js](https://img.shields.io/badge/Three.js-renderer-000000?style=flat-square&logo=three.js&logoColor=white)
-![WebView2](https://img.shields.io/badge/WebView2-host-0078D6?style=flat-square&logo=microsoftedge&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)
 
-<br />
-
-<!-- 👉 デモ GIF / スクリーンショットをここに貼ると映えます (docs/preview.gif など) -->
-<!-- ![preview](docs/preview.gif) -->
+<!-- デモ動画(GIF または mp4)をここに差し込む。例: ![demo](docs/demo.gif) -->
+<!-- X(旧 Twitter)の投稿をここに差し込む。 -->
 
 </div>
 
----
+## できること
 
-## ✨ Features
+エクスプローラーでファイルを選んでスペースキーを押すと、3D モデルが表示されます。
+マウスのドラッグで回転、スクロールで拡大縮小、右ドラッグで平行移動できます。
 
-- 🚀 **Instant preview** — select a file in Explorer, press <kbd>Space</kbd>, done.
-- 🧍 **VRM avatars** — full character rendering via [`@pixiv/three-vrm`](https://github.com/pixiv/three-vrm).
-- 🎞️ **Animations** — `.vrma` motion and animated `.glb` are played back.
-- 🖱️ **Orbit controls** — drag to rotate, scroll to zoom, right‑drag to pan.
-- 🌗 **Theme-aware** — follows QuickLook's light / dark theme.
-- 🪶 **Lightweight host** — ships only the built renderer; relies on the OS WebView2 runtime.
+左上の情報パネルに、形式、ファイルサイズ、ポリゴン数、頂点数、メッシュ数、マテリアル数、テクスチャ数、ボーン数、アニメーション、VRM のメタ情報を表示します。
+情報パネルは i キーで開閉できます。
 
-## 📦 Supported formats
+表示は QuickLook 本体のテーマ(ライト/ダーク)に追従します。
+情報パネルのラベルは OS の表示言語に応じて英語、日本語、韓国語で切り替わります(既定は英語)。
 
-| Format  | Description                       | Status |
-| :------ | :-------------------------------- | :----: |
-| `.glb`  | glTF binary (static & animated)   |   ✅   |
-| `.vrm`  | VRM avatar (`@pixiv/three-vrm`)   |   ✅   |
-| `.vrma` | VRM animation                     |   ✅   |
-| `.fbx`  | Autodesk FBX                      |  ⚠️\*  |
+## 対応フォーマット
 
-> \* FBX renders, but models relying on **external texture files** may appear dark — texture handling is a work in progress.
+| 形式 | 内容 | 状態 |
+| :--- | :--- | :--: |
+| `.glb` | glTF バイナリ(静止/アニメーション) | 対応 |
+| `.vrm` | VRM アバター(`@pixiv/three-vrm`) | 対応 |
+| `.vrma` | VRM アニメーション | 対応 |
+| `.fbx` | Autodesk FBX | 一部対応 |
 
-## 🚀 Install
+`.fbx` は表示できますが、外部テクスチャファイルに依存するモデルは暗く見えることがあります(テクスチャ処理は改善中)。
 
-1. Grab **`QuickLook.Plugin.Model3DViewer.qlplugin`** (build it from source — see below).
-2. With **QuickLook running**, select the `.qlplugin` file and press <kbd>Space</kbd>.
-3. Click **Install**, then **restart QuickLook**.
-4. Press <kbd>Space</kbd> on any `.glb` / `.vrm` / `.vrma` / `.fbx` file. 🎉
+## インストール
 
-> **Requirements:** Windows 10/11 · [QuickLook](https://github.com/QL-Win/QuickLook) 4.x · WebView2 Runtime (preinstalled on Windows 11).
+1. `QuickLook.Plugin.Model3DViewer.qlplugin` を用意します(下記のビルド手順、またはリリースページから取得)。
+2. QuickLook を起動した状態で、`.qlplugin` ファイルを選んでスペースキーを押します。
+3. 「Install」を押し、QuickLook を再起動します。
+4. `.glb` / `.vrm` / `.vrma` / `.fbx` のいずれかを選んでスペースキーを押します。
 
-## 🛠️ Build from source
+動作要件:Windows 10/11、[QuickLook](https://github.com/QL-Win/QuickLook) 4.x、WebView2 ランタイム(Windows 11 には標準搭載)。
 
-**Prerequisites:** [Node.js](https://nodejs.org/) 18+ · [.NET SDK](https://dotnet.microsoft.com/) (Windows).
+## ソースからのビルド
+
+前提:[Node.js](https://nodejs.org/) 20 以上、[.NET SDK](https://dotnet.microsoft.com/)(Windows)。
 
 ```bash
-# 1. Build the web renderer  ->  renderer/dist
+# 1. Web レンダラーをビルドする(renderer/dist を生成)
 cd renderer
-npm install
+npm ci
 npm run build
 
-# 2. Build the plugin
+# 2. プラグインをビルドする
 cd ..
 dotnet build QuickLook.Plugin.Model3DViewer.sln -c Release
 
-# 3. Package into a .qlplugin
+# 3. .qlplugin にパッケージする
 powershell -ExecutionPolicy Bypass -File Scripts/pack-zip.ps1
 ```
 
-Then install the generated `QuickLook.Plugin.Model3DViewer.qlplugin` as described above.
+生成された `QuickLook.Plugin.Model3DViewer.qlplugin` を、上記のインストール手順で導入します。
 
-> `QuickLook.Common` is consumed as a **NuGet package** — no git submodule required.
+`QuickLook.Common` は NuGet パッケージとして参照します(git submodule は不要)。
+`v` で始まるタグ(例:`v0.2.0`)を push すると、GitHub Actions が `.qlplugin` をビルドし、リリースに添付します。
 
-## 🧩 How it works
+## 仕組み
 
 ```
-Explorer ──Space──▶ QuickLook ──▶ Plugin (IViewer, C#)
-                                      │
-                                      ▼
-                              WebView2 control
-                                      │
-                                      ▼
-                   Three.js renderer (Vite build)  ◀── model file
+エクスプローラー --(Space)--> QuickLook --> プラグイン (IViewer, C#)
+                                                |
+                                                v
+                                        WebView2 コントロール
+                                                |
+                                                v
+                            Three.js レンダラー (Vite build) <-- モデルファイル
 ```
 
-The C# plugin implements QuickLook's `IViewer` and hosts a **WebView2** control. Inside it runs a
-small **Three.js / Vite** app (vendored from [sawa-zen/quick-look-3d](https://github.com/sawa-zen/quick-look-3d))
-that loads the selected model and renders it with orbit controls.
+C# のプラグインは QuickLook の `IViewer` を実装し、WebView2 コントロールを表示します。
+その中で Three.js と Vite による小さなアプリが動き、選択されたモデルを読み込んで描画します。
+レンダラーは [sawa-zen/quick-look-3d](https://github.com/sawa-zen/quick-look-3d)(macOS 版)を取り込んでいます。
 
-## 🙏 Credits
+## クレジット
 
-- Renderer based on [**sawa-zen/quick-look-3d**](https://github.com/sawa-zen/quick-look-3d) — the macOS counterpart (MIT, © sawa-zen).
-- Scaffolded from the [**QuickLook.Plugin.HelloWorld**](https://github.com/QL-Win/QuickLook.Plugin.HelloWorld) template (MIT, © Paddy Xu).
-- Built for [**QuickLook**](https://github.com/QL-Win/QuickLook) by Paddy Xu & contributors.
-- VRM support by [**@pixiv/three-vrm**](https://github.com/pixiv/three-vrm).
+- レンダラーは [sawa-zen/quick-look-3d](https://github.com/sawa-zen/quick-look-3d)(macOS 版、MIT、© sawa-zen)を基にしています。
+- [QuickLook.Plugin.HelloWorld](https://github.com/QL-Win/QuickLook.Plugin.HelloWorld) テンプレート(MIT、© Paddy Xu)から作成しました。
+- 本体の [QuickLook](https://github.com/QL-Win/QuickLook) は Paddy Xu 氏とコントリビューターによるものです。
+- VRM 対応は [@pixiv/three-vrm](https://github.com/pixiv/three-vrm) を利用しています。
 
-## 📄 License
+## ライセンス
 
-[MIT](LICENSE.txt) — see [`LICENSE.txt`](LICENSE.txt).
+[MIT](LICENSE.txt)。
